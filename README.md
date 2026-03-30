@@ -23,7 +23,7 @@ Bu proje, bir ERP (Enterprise Resource Planning) Supervisor bakış açısıyla 
 ## 📸 Ekran Görüntüsü
 
 ![Sistem Arayüzü](https://raw.githubusercontent.com/ecenozdemir/Life-ERP/main/ekran_goruntusu.png) 
-*(Not: Buraya klasöründeki temiz bir ekran görüntüsünü ekleyebilirsin)*
+
 
 ## 🚀 Kurulum ve Çalıştırma
 
