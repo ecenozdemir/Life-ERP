@@ -1,13 +1,15 @@
-import requests
-import sqlite3
+import os
+from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from datetime import datetime
 
-# --- SPOTIFY AYARLARI (Buraya kendi kodlarını yapıştır) ---
-CLIENT_ID = 093a3ae59ea7461a95e7030fb8654033
-CLIENT_SECRET = 2501036109a94ec89fa522704eb353ec
-REDIRECT_URI = "https://localhost:8888/callback" # HTTPS yaptığın için böyle kalsın
+# .env dosyasındaki şifreleri sisteme yükle
+load_dotenv()
+
+# Şifreleri direkt yazmak yerine dosyadan çekiyoruz
+CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
+CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
+REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI')
 
 def sarki_cek():
     try:
