@@ -1,7 +1,10 @@
 import os
-from dotenv import load_dotenv
+import sqlite3
+import requests
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from dotenv import load_dotenv
+from datetime import datetime  # Eksik olan tam olarak buydu!
 
 # .env dosyasındaki şifreleri sisteme yükle
 load_dotenv()
