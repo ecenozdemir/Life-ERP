@@ -4,35 +4,41 @@ import requests
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
-from datetime import datetime  # Eksik olan tam olarak buydu!
+from datetime import datetime
 
-# .env dosyasındaki şifreleri sisteme yükle
+# --- Ayarlar ---
 load_dotenv()
-
-# Şifreleri direkt yazmak yerine dosyadan çekiyoruz
 CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
 REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI')
+
+def ekrani_temizle():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def sarki_cek():
     try:
         sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
                                                client_secret=CLIENT_SECRET,
                                                redirect_uri=REDIRECT_URI,
-                                               scope="user-read-recently-played"))
+                                               scope="user-read-recently-played",
+                                               open_browser=False))
         results = sp.current_user_recently_played(limit=1)
         if results['items']:
             track = results['items'][0]['track']
             return f"{track['artists'][0]['name']} - {track['name']}"
-        return "Bugun sarki dinlenmemis"
-    except Exception as e:
-        print(f"🎵 Spotify hatasi: {e}")
-        return "Spotify Baglanamadi"
+        return "Müzik bulunamadı."
+    except:
+        return "Spotify bağlantısı kurulamadı."
 
 def veri_cek_ve_kaydet():
-    print("\n--- 🤖 Life-ERP Otomasyonu Baslatiliyor ---")
+    ekrani_temizle()
+    print("===========================================")
+    print("   🌟 LIFE-ERP: GÜNLÜK VERİ GİRİŞİ 🌟")
+    print("===========================================\n")
     
-    # 1. İnternet Verileri (Dolar, Hava, Spotify)
+    # Otomatik veriler çekilirken kullanıcıyı bekletme hissi verelim
+    print("⏳ Sistem verileri senkronize ediliyor...")
+    
     try:
         dolar_url = "https://api.exchangerate-api.com/v4/latest/USD"
         dolar_kuru = requests.get(dolar_url).json()['rates']['TRY']
@@ -40,31 +46,37 @@ def veri_cek_ve_kaydet():
         hava_url = "https://wttr.in/Istanbul?format=j1"
         hava_verisi = requests.get(hava_url).json()
         derece = int(hava_verisi['current_condition'][0]['temp_C'])
-        durum = "Gunesli" # Basitlestirdik
         
         sarki = sarki_cek()
-        print(f"✅ Veriler Alindi: Dolar {dolar_kuru} TL | Hava {derece}°C | Son Sarki: {sarki}")
     except:
-        dolar_kuru, derece, durum, sarki = 0.0, 0, "Bilinmiyor", "Veri yok"
+        dolar_kuru, derece, sarki = 0.0, 0, "Bilinmiyor"
 
-    # 2. Manuel Veri Girisi
-    print("\n--- 🧠 Gunluk Oz-Gozlem ---")
-    mood = input("Bugun modun nasildi? (1-10): ")
-    sosyal = input("Sosyal temas/iletisim nasildi? (1-10): ")
-    kod = input("Kac satir kod yazdin?: ")
-    kitap = input("Kac sayfa kitap okudun?: ")
+    ekrani_temizle()
+    print("===========================================")
+    print(f"📅 TARİH: {datetime.now().strftime('%d.%m.%Y')}")
+    print(f"💵 DOLAR: {dolar_kuru} TL  |  🌡️ HAVA: {derece}°C")
+    print(f"🎵 SON DİNLENEN: {sarki}")
+    print("===========================================\n")
+
+    # Temiz Giriş Alanı
+    mood = input("✨ Bugün modun nasıldı? (1-10): ")
+    sosyal = input("🤝 Sosyal temas puanın? (1-10): ")
+    kod = input("💻 Kaç satır kod yazdın?: ")
+    kitap = input("📚 Kaç sayfa kitap okudun?: ")
     tarih = datetime.now().strftime('%Y-%m-%d')
 
-    # 3. Veritabanina Kaydetme
+    # Kayıt
     conn = sqlite3.connect('life_erp.db')
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO Gunluk_Veri (tarih, mood_puani, kod_satiri, kitap_sayfasi, dolar_kuru, hava_derece, hava_durumu, sosyal_temas, dinlenen_sarki)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (tarih, mood, kod, kitap, dolar_kuru, derece, durum, sosyal, sarki))
+        VALUES (?, ?, ?, ?, ?, ?, 'Güneşli', ?, ?)
+    ''', (tarih, mood, kod, kitap, dolar_kuru, derece, sosyal, sarki))
     conn.commit()
     conn.close()
-    print(f"\n🚀 Harika Ece Nur! Sarkinla beraber her sey kaydedildi.")
+
+    print("\n✅ Veriler başarıyla SQL'e mühürlendi.")
+    print("🚀 GitHub yedeklemesi için hazırlanılıyor...")
 
 if __name__ == "__main__":
     veri_cek_ve_kaydet()
